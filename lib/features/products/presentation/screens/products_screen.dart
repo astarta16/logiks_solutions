@@ -11,7 +11,6 @@ class ProductsScreen extends ConsumerStatefulWidget {
 
 class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   int? expandedIndex;
-
   final ScrollController _scrollController = ScrollController();
   List<GlobalKey> itemKeys = [];
 
@@ -20,95 +19,166 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final productsState = ref.watch(productsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
-      body: productsState.when(
-        data: (stateData) {
-          final products = stateData.products;
-          final updatedIndex = stateData.updatedIndex;
+      extendBodyBehindAppBar: true,
 
-          if (itemKeys.length != products.length) {
-            itemKeys = List.generate(products.length, (_) => GlobalKey());
-          }
+      appBar: AppBar(
+        title: const Text(
+          'Products',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
 
-          return ListView.builder(
-            controller: _scrollController,
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              final isExpanded = expandedIndex == index;
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF5F7FA), Color(0xFFE4E7EC)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: productsState.when(
+            data: (stateData) {
+              final products = stateData.products;
+              final updatedIndex = stateData.updatedIndex;
 
-              return Container(
-                key: itemKeys[index],
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: Row(
-                        children: [
-                          Expanded(
-                            child: Text('${product.id} - ${product.name}'),
-                          ),
+              if (itemKeys.length != products.length) {
+                itemKeys = List.generate(products.length, (_) => GlobalKey());
+              }
 
-                          if (updatedIndex == index && expandedIndex != index)
-                            Container(
-                              margin: const EdgeInsets.only(left: 8),
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                        ],
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(
-                          isExpanded
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
+              return ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  final isExpanded = expandedIndex == index;
+
+                  return Container(
+                    key: itemKeys[index],
+                    margin: const EdgeInsets.only(bottom: 14),
+
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            expandedIndex = isExpanded ? null : index;
-                          });
-
-                          if (!isExpanded) {
-                            Future.delayed(
-                              const Duration(milliseconds: 300),
-                              () {
-                                final context = itemKeys[index].currentContext;
-
-                                if (context != null) {
-                                  Scrollable.ensureVisible(
-                                    context,
-                                    duration: const Duration(milliseconds: 400),
-                                    curve: Curves.easeInOut,
-                                  );
-                                }
-                              },
-                            );
-                          }
-                        },
-                      ),
+                      ],
                     ),
 
-                    if (isExpanded)
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        color: updatedIndex == index
-                            ? Colors.yellow.shade200
-                            : Colors.grey.shade200,
-                        child: Text(product.data?.toString() ?? 'No details'),
-                      ),
-                  ],
-                ),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  product.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+
+                              if (updatedIndex == index &&
+                                  expandedIndex != index)
+                                Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          subtitle: Text(
+                            'ID: ${product.id}',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 12,
+                            ),
+                          ),
+
+                          trailing: AnimatedRotation(
+                            turns: isExpanded ? 0.5 : 0,
+                            duration: const Duration(milliseconds: 300),
+                            child: const Icon(Icons.keyboard_arrow_down),
+                          ),
+
+                          onTap: () {
+                            setState(() {
+                              expandedIndex = isExpanded ? null : index;
+                            });
+
+                            if (!isExpanded) {
+                              Future.delayed(
+                                const Duration(milliseconds: 300),
+                                () {
+                                  final context =
+                                      itemKeys[index].currentContext;
+
+                                  if (context != null) {
+                                    Scrollable.ensureVisible(
+                                      context,
+                                      duration: const Duration(
+                                        milliseconds: 400,
+                                      ),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  }
+                                },
+                              );
+                            }
+                          },
+                        ),
+
+                        AnimatedCrossFade(
+                          firstChild: const SizedBox(),
+                          secondChild: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: updatedIndex == index
+                                  ? Colors.yellow.shade100
+                                  : const Color(0xFFF9FAFB),
+                              borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(18),
+                              ),
+                            ),
+                            child: Text(
+                              product.data?.toString() ?? 'No details',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                          crossFadeState: isExpanded
+                              ? CrossFadeState.showSecond
+                              : CrossFadeState.showFirst,
+                          duration: const Duration(milliseconds: 250),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Error: $e')),
+          ),
+        ),
       ),
     );
   }

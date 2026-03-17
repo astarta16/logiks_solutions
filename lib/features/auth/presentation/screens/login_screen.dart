@@ -19,72 +19,161 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final state = ref.watch(authProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
+      backgroundColor: const Color(0xFFF5F6FA),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
-            ),
-            const SizedBox(height: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Welcome',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
 
-            if (state.error != null)
-              Text(state.error!, style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 8),
 
-            ElevatedButton(
-              onPressed: state.isLoading
-                  ? null
-                  : () async {
-                      final success = await ref
-                          .read(authProvider.notifier)
-                          .login(
-                            usernameController.text,
-                            passwordController.text,
-                          );
+                Text(
+                  'Login to continue',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
 
-                      if (success && context.mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ProductsScreen(),
+                const SizedBox(height: 24),
+
+                TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    filled: true,
+                    fillColor: const Color(0xFFF1F2F6),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    filled: true,
+                    fillColor: const Color(0xFFF1F2F6),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                if (state.error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      state.error!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+
+                const SizedBox(height: 8),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: state.isLoading
+                        ? null
+                        : () async {
+                            final success = await ref
+                                .read(authProvider.notifier)
+                                .login(
+                                  usernameController.text,
+                                  passwordController.text,
+                                );
+
+                            if (success && context.mounted) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ProductsScreen(),
+                                ),
+                              );
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: state.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Login',
+                            style: TextStyle(color: Colors.white),
                           ),
-                        );
-                      }
-                    },
-              child: state.isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text('Login'),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    onPressed: state.isLoading
+                        ? null
+                        : () async {
+                            final success = await ref
+                                .read(authProvider.notifier)
+                                .loginWithBiometrics();
+
+                            if (success && context.mounted) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ProductsScreen(),
+                                ),
+                              );
+                            }
+                          },
+                    icon: const Icon(Icons.fingerprint),
+                    label: const Text('Login with Biometrics'),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-
-            const SizedBox(height: 10),
-
-            ElevatedButton(
-              onPressed: state.isLoading
-                  ? null
-                  : () async {
-                      final success = await ref
-                          .read(authProvider.notifier)
-                          .loginWithBiometrics();
-
-                      if (success && context.mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const Placeholder(),
-                          ),
-                        );
-                      }
-                    },
-              child: const Text('Login with Biometrics'),
-            ),
-          ],
+          ),
         ),
       ),
     );
