@@ -4,14 +4,20 @@ class BiometricService {
   final LocalAuthentication _auth = LocalAuthentication();
 
   Future<bool> authenticate() async {
-    final isAvailable = await _auth.canCheckBiometrics;
-    if (!isAvailable) return false;
-
     try {
-      return await _auth.authenticate(
+      final canCheck = await _auth.canCheckBiometrics;
+      final isSupported = await _auth.isDeviceSupported();
+
+      if (!canCheck || !isSupported) {
+        return false;
+      }
+
+      final isAuthenticated = await _auth.authenticate(
         localizedReason: 'Authenticate to login',
-        biometricOnly: true,
+        biometricOnly: false,
       );
+
+      return isAuthenticated;
     } catch (e) {
       return false;
     }
